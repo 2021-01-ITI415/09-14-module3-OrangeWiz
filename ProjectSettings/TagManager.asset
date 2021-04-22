@@ -4,11 +4,12 @@
 TagManager:
   serializedVersion: 2
   tags:
+  - Fire
   - HardFloor
   - Doorway
   - Water
-  - EnemyZone
   - Ambience
+  - EnemyZone
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - 
   - 
   - 
-  - Enemies
+  - 
   - 
   - 
   - 
