@@ -28,6 +28,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
 
+        public AudioClip pickupSound;
+        public AudioClip waterSound;
+        public AudioSource audioS;
+        bool hardFloor = false;
+
         private Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
@@ -41,6 +46,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+        int count = 0;
 
         // Use this for initialization
         private void Start()
@@ -166,14 +172,30 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 return;
             }
-            // pick & play a random footstep sound from the array,
-            // excluding sound at index 0
-            int n = Random.Range(1, m_FootstepSounds.Length);
-            m_AudioSource.clip = m_FootstepSounds[n];
-            m_AudioSource.PlayOneShot(m_AudioSource.clip);
-            // move picked sound to index 0 so it's not picked next time
-            m_FootstepSounds[n] = m_FootstepSounds[0];
-            m_FootstepSounds[0] = m_AudioSource.clip;
+
+            if (hardFloor == false)
+            {
+                // pick & play a random footstep sound from the array,
+                // excluding sound at index 0
+                int n = Random.Range(1, m_FootstepSounds.Length-2);
+                m_AudioSource.clip = m_FootstepSounds[n];
+                m_AudioSource.PlayOneShot(m_AudioSource.clip);
+                // move picked sound to index 0 so it's not picked next time
+                m_FootstepSounds[n] = m_FootstepSounds[0];
+                m_FootstepSounds[0] = m_AudioSource.clip;
+            }
+
+            else if (hardFloor == true)
+            {
+                // pick & play a random footstep sound from the array,
+                // excluding sound at index 0
+                int n = Random.Range(2, m_FootstepSounds.Length);
+                m_AudioSource.clip = m_FootstepSounds[n];
+                m_AudioSource.PlayOneShot(m_AudioSource.clip);
+                // move picked sound to index 0 so it's not picked next time
+                m_FootstepSounds[n] = m_FootstepSounds[3];
+                m_FootstepSounds[3] = m_AudioSource.clip;
+            }
         }
 
 
@@ -254,6 +276,35 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 return;
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+        }
+
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject.CompareTag("PickUp"))
+            {
+                other.gameObject.SetActive(false);
+                audioS.PlayOneShot(pickupSound);
+                count++;
+            }
+
+            if(other.gameObject.CompareTag("Water"))
+            {
+                audioS.PlayOneShot(waterSound);
+            }
+
+            if (other.gameObject.CompareTag("HardFloor"))
+            {
+                hardFloor = true;
+            }
+
+        }
+
+        void OnTriggerExit(Collider other)
+        {
+            if (other.gameObject.CompareTag("HardFloor"))
+            {
+                hardFloor = false;
+            }
         }
     }
 }
