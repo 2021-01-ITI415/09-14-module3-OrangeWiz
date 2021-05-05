@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
+using UnityEngine.UI;
+using UnityEngine.Audio;
 
 namespace UnityStandardAssets.Characters.FirstPerson
 {
@@ -31,7 +33,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public AudioClip pickupSound;
         public AudioClip waterSound;
         public AudioSource audioS;
+        public AudioMixerSnapshot ambIdleSnapshot;
+        public AudioMixerSnapshot ambInSnapshot;
+
         bool hardFloor = false;
+        public Text countText;
+        public Text introText;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -278,6 +285,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
         }
 
+        void SetCountText()
+        {
+            countText.text = "Score: " + count.ToString() +"/9";
+            if (count == 9)
+            {
+                introText.text = "Congratulations, you live :)";
+                introText.color = new Color32(124, 252, 0, 255);
+            }
+        }
+
         void OnTriggerEnter(Collider other)
         {
             if (other.gameObject.CompareTag("PickUp"))
@@ -285,6 +302,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 other.gameObject.SetActive(false);
                 audioS.PlayOneShot(pickupSound);
                 count++;
+                SetCountText();
             }
 
             if(other.gameObject.CompareTag("Water"))
@@ -297,6 +315,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 hardFloor = true;
             }
 
+            if (other.CompareTag("Ambience"))
+            {
+                ambInSnapshot.TransitionTo(0.5f);
+            }
+
         }
 
         void OnTriggerExit(Collider other)
@@ -304,6 +327,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (other.gameObject.CompareTag("HardFloor"))
             {
                 hardFloor = false;
+            }
+
+            if (other.CompareTag("Ambience"))
+            {
+                ambIdleSnapshot.TransitionTo(0.5f);
             }
         }
     }
